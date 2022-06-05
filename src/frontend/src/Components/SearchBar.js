@@ -4,7 +4,7 @@ import TweetDisplay from "./TweetDisplay";
 import TweetData from "./sample.json";
 import axios from 'axios';
 
-const SEARCH_SUBMIT_API = 'http://localhost:8080/api/search?queryString='
+const SEARCH_SUBMIT_API = 'http://localhost:8080/api/search/'
 
 function SearchBar({ placeholder }) {
     const [userInput, setUserInput] = useState("");
@@ -19,10 +19,11 @@ function SearchBar({ placeholder }) {
         e.preventDefault()
         // checking what user input is being sent over to the backend
         console.log(userInput)
-        console.log(axios.post(SEARCH_SUBMIT_API, userInput))
         axios.post(SEARCH_SUBMIT_API, userInput)
             .then(resAxios => {
                 setSearchResults(resAxios.data)
+                // printing out results from the backend, should work once mongo is connected
+                console.log(searchResults)
             })
             .catch(err => {
                 alert("ERROR: " + err)
@@ -38,8 +39,8 @@ function SearchBar({ placeholder }) {
                     <button class="button" onClick={searchSubmit}>Search!</button>
                 </div>
             </div>
-
-            <TweetDisplay data={TweetData} />
+            {/*this is a comment: switched TweetData for searchResults, frontend page is now blank*/}
+            <TweetDisplay data={searchResults} />
         </div>
     );
 }

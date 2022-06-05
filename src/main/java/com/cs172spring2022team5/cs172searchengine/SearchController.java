@@ -118,7 +118,7 @@ public class SearchController {
     }
 
     @GetMapping("search")
-    public static ResponseEntity<Object> searchFiles(@RequestParam String queryString) {
+    public static ResponseEntity<Object> searchFiles(@RequestBody String queryString) {
         System.out.println("Here's the search: " + queryString);
         try {
             Query query = new QueryParser("tweet_text", analyzer).parse(queryString);
