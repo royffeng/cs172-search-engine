@@ -1,6 +1,21 @@
 package com.cs172spring2022team5.cs172searchengine;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.MongoClient;
+import com.journaldev.mongodb.model.User;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.WriteResult;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.mongo.MongoClientFactory;
 import org.springframework.web.bind.annotation.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -18,6 +33,12 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.json.JSONObject;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+
+
+import javax.websocket.server.PathParam;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,7 +51,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin("*")
+//@JsonSerialize
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchController {
+
     public static final String output_directory = "C:\\Users\\micha\\Desktop\\oneseventwo\\index";
     public static Analyzer analyzer = new StandardAnalyzer(); // converts text to tokens
 
@@ -101,8 +125,8 @@ public class SearchController {
         // System.out.println("Total Objects: " + objCount);
     }
 
-    @GetMapping("/search")
-    public static List<Document> searchFiles(@RequestParam(required=false, defaultValue="") String queryString) {
+    @GetMapping("/search/{queryString}")
+    public static JSONObject[] searchFiles(@PathVariable String queryString) {
         try {
             Query query = new QueryParser("tweet_text", analyzer).parse(queryString);
 
@@ -114,12 +138,28 @@ public class SearchController {
 
             // System.out.println("Number of hits: " + topDocs.totalHits);
 
-            List<Document> documents = new ArrayList<>();
-            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
-                documents.add(searcher.doc(scoreDoc.doc));
+//            List<Document> documents = new ArrayList<>();
+//            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+//                documents.add(searcher.doc(scoreDoc.doc));
+//            }
+
+            JSONObject[] results = {};
+
+
+            MongoClient mongoClient = new MongoClient("localhost", 27017);
+            DB db = mongoClient.getDB("group5tweeter");
+            DBCollection col = db.getCollection("tweet_collection");
+
+
+            List<Document> docs = new ArrayList<>();
+            for (Document x : topDocs) {
+                String temp = x.get("_id");
+                //shove into mongo
+                DBCursor cursor = col.find(temp);
+                //take whatever we get append to results
             }
 
-            return documents;
+            //return results;
         } catch (Exception e) {
             System.out.println("rip " + e);
             e.printStackTrace();
