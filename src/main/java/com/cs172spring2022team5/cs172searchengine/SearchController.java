@@ -1,7 +1,5 @@
 package com.cs172spring2022team5.cs172searchengine;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.mongodb.*;
 
 import com.mongodb.DB;
@@ -9,8 +7,9 @@ import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.mongo.MongoClientFactory;
+import org.json.JSONArray;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -33,20 +32,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-import javax.websocket.server.PathParam;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-
 
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin("*")
-//@JsonSerialize
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchController {
 
@@ -121,7 +114,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/{queryString}")
-    public static JSONObject[] searchFiles(@PathVariable String queryString) {
+    public static ResponseEntity<Object> searchFiles(@PathVariable String queryString) {
         try {
             Query query = new QueryParser("tweet_text", analyzer).parse(queryString);
 
@@ -138,36 +131,37 @@ public class SearchController {
 //                documents.add(searcher.doc(scoreDoc.doc));
 //            }
 
-            JSONObject[] results = new JSONObject[10];
-
+            //JSONObject[] results = new JSONObject[10];
+            JSONArray jsArr = new JSONArray();
 
             MongoClient mongoClient = new MongoClient("localhost", 27017);
             DB db = mongoClient.getDB("group5tweeter");
             DBCollection col = db.getCollection("tweet_collection");
-            int ind = 0;
+            //int ind = 0;
 
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document temp = searcher.doc(scoreDoc.doc);
                 String hitId = temp.get("_id");
                 ObjectId hitIdObj = new ObjectId(hitId);
-                System.out.println(hitId);
+                //System.out.println(hitId);
                 BasicDBObject queryObj = new BasicDBObject("_id", hitIdObj);
 
                 try (DBCursor cursor = col.find(queryObj)) {
                     while (cursor.hasNext()) {
                         DBObject resultDBO = cursor.next();
                         JSONObject resultJSON = new JSONObject(JSON.serialize(resultDBO));
-                        results[ind] = resultJSON;
-                        ind++;
+                        Long strId = resultJSON.getLong("id");
+                        String strScreenName = resultJSON.getString("screen_name");
+                        String strUrl = "https://twitter.com/" + strScreenName + "/status/" + strId;
+                        resultJSON.put("url", strUrl);
+                        jsArr.put(resultJSON.toMap());
                     }
                 }
             }
 
-            for (JSONObject x : results) {
-                System.out.println(x);
-            }
 
-            return results;
+
+            return new ResponseEntity<>(jsArr.toList(), HttpStatus.OK);
         } catch (Exception e) {
             System.out.println("rip " + e);
             e.printStackTrace();
