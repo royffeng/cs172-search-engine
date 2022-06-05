@@ -1,5 +1,6 @@
 package com.cs172spring2022team5.cs172searchengine;
 
+import org.bson.types.ObjectId;
 import org.springframework.web.bind.annotation.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -23,11 +24,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
+
+
 @RestController
 @RequestMapping("/api")
 @CrossOrigin("*")
 public class SearchController {
-    public static final String output_directory = "/Users/royfeng/Documents/CS172/cs172-search-engine/index";
+    public static final String output_directory = "C:\\Users\\micha\\Desktop\\oneseventwo\\index";
     public static Analyzer analyzer = new StandardAnalyzer(); // converts text to tokens
 
     static {
@@ -42,7 +46,7 @@ public class SearchController {
     }
 
     public static void createIndex() throws Exception {
-        File inputFile = new File("/Users/royfeng/Documents/CS172/cs172-search-engine/pretty_tweet_collection.json"); // file that you are reading from
+        File inputFile = new File("C:\\Users\\micha\\Desktop\\oneseventwo\\pretty_tweet_collection.json"); // file that you are reading from
         BufferedReader reader = new BufferedReader(new FileReader(inputFile));
         ArrayList<JSONObject> jsonObjectArray = new ArrayList<>();
 
@@ -83,20 +87,15 @@ public class SearchController {
         // int objCount = 0;
         for (JSONObject element : jsonObjectArray) {
             // objCount++;
-            JSONObject id_object = element.getJSONObject("id");
-            String id = id_object.getString("$numberLong"); //store as long maybe?
+            JSONObject temp = element.getJSONObject("_id");
+            String _id = temp.getString("$oid");
             String tweet_text = element.getString("tweet_text");
-            String created_at = element.getString("created_at");
-            String name = element.getString("name");
-            String screen_name = element.getString("screen_name");
 
             Document doc;
             doc = new Document();
-            doc.add(new TextField("id", id, org.apache.lucene.document.Field.Store.YES)); // technically should be able to import this statement but it's not working
-            doc.add(new TextField("tweet_text", tweet_text, org.apache.lucene.document.Field.Store.YES));
-            doc.add(new TextField("created_at", created_at, org.apache.lucene.document.Field.Store.YES));
-            doc.add(new TextField("name", name, org.apache.lucene.document.Field.Store.YES));
-            doc.add(new TextField("screen_name", screen_name, org.apache.lucene.document.Field.Store.YES)); // org.apache.lucene.document.Field.Index.ANALYZED
+
+            doc.add(new TextField("_id", _id, org.apache.lucene.document.Field.Store.YES));
+            doc.add(new TextField("tweet_text", tweet_text, org.apache.lucene.document.Field.Store.NO));
             indexWriter.addDocument(doc);
         }
         // System.out.println("Total Objects: " + objCount);
