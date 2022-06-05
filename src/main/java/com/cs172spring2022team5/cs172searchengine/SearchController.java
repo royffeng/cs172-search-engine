@@ -9,8 +9,11 @@ import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
+import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.MongoClientFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -46,7 +49,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin("*")
-//@JsonSerialize
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchController {
 
@@ -121,7 +123,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/{queryString}")
-    public static JSONObject[] searchFiles(@PathVariable String queryString) {
+    public static ResponseEntity<Object> searchFiles(@PathVariable String queryString) {
         try {
             Query query = new QueryParser("tweet_text", analyzer).parse(queryString);
 
@@ -138,13 +140,13 @@ public class SearchController {
 //                documents.add(searcher.doc(scoreDoc.doc));
 //            }
 
-            JSONObject[] results = new JSONObject[10];
-
+            //JSONObject[] results = new JSONObject[10];
+            JSONArray jsArr = new JSONArray();
 
             MongoClient mongoClient = new MongoClient("localhost", 27017);
             DB db = mongoClient.getDB("group5tweeter");
             DBCollection col = db.getCollection("tweet_collection");
-            int ind = 0;
+            //int ind = 0;
 
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document temp = searcher.doc(scoreDoc.doc);
@@ -157,17 +159,16 @@ public class SearchController {
                     while (cursor.hasNext()) {
                         DBObject resultDBO = cursor.next();
                         JSONObject resultJSON = new JSONObject(JSON.serialize(resultDBO));
-                        results[ind] = resultJSON;
-                        ind++;
+                        jsArr.put(resultJSON.toMap());
                     }
                 }
             }
 
-            for (JSONObject x : results) {
-                System.out.println(x);
-            }
+//            for (JSONObject x : results) {
+//                System.out.println(x);
+//            }
 
-            return results;
+            return new ResponseEntity<>(jsArr.toList(), HttpStatus.OK);
         } catch (Exception e) {
             System.out.println("rip " + e);
             e.printStackTrace();
