@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 import javax.websocket.server.PathParam;
 import java.io.*;
 import java.nio.file.Paths;
@@ -43,16 +42,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-
-
+@CrossOrigin("http://localhost:3000/")
 @RestController
-@RequestMapping("/api")
-@CrossOrigin("*")
-//@JsonIgnoreProperties(ignoreUnknown = true)
+@RequestMapping(value = "api/", method = RequestMethod.POST)
 public class SearchController {
 
-    public static final String output_directory = "C:\\Users\\micha\\Desktop\\oneseventwo\\index";
+    public static final String output_directory = "/Users/royfeng/Desktop/cs172-search-engine/index";
     public static Analyzer analyzer = new StandardAnalyzer(); // converts text to tokens
 
     static {
@@ -67,7 +62,7 @@ public class SearchController {
     }
 
     public static void createIndex() throws Exception {
-        File inputFile = new File("C:\\Users\\micha\\Desktop\\oneseventwo\\pretty_tweet_collection.json"); // file that you are reading from
+        File inputFile = new File("/Users/royfeng/Desktop/cs172-search-engine/pretty_tweet_collection.json"); // file that you are reading from
         BufferedReader reader = new BufferedReader(new FileReader(inputFile));
         ArrayList<JSONObject> jsonObjectArray = new ArrayList<>();
 
@@ -122,8 +117,9 @@ public class SearchController {
         // System.out.println("Total Objects: " + objCount);
     }
 
-    @GetMapping("/search/{queryString}")
-    public static ResponseEntity<Object> searchFiles(@PathVariable String queryString) {
+    @GetMapping("search")
+    public static ResponseEntity<Object> searchFiles(@RequestParam String queryString) {
+        System.out.println("Here's the search: " + queryString);
         try {
             Query query = new QueryParser("tweet_text", analyzer).parse(queryString);
 
