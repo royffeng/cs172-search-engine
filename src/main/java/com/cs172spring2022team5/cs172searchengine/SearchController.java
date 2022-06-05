@@ -159,8 +159,6 @@ public class SearchController {
                 }
             }
 
-
-
             return new ResponseEntity<>(jsArr.toList(), HttpStatus.OK);
         } catch (Exception e) {
             System.out.println("rip " + e);

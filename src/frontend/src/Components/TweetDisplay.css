@@ -1,0 +1,33 @@
+.TweetDisplay {
+  margin-top: 20px;
+}
+
+.card {
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    width: 94%;
+  }
+
+.firstLine {
+    display: inline;
+    font-size: large;
+    width: 100;
+    height: 100px;
+    padding: 5px;
+    /*border: 1px solid blue;  */
+    background-color: rgb(255, 255, 255); 
+  }
+
+.text {
+    font-size: large;
+    width: 100;
+    height: 50px;
+    padding: 5px;
+    /*border: 1px solid blue;  */
+    background-color: rgb(255, 255, 255); 
+}
+
+.fadedText {
+    color:rgb(136, 141, 147)
+}
