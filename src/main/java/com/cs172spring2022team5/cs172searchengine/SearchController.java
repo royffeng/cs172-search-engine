@@ -2,17 +2,12 @@ package com.cs172spring2022team5.cs172searchengine;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.mongodb.*;
+
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
-import com.journaldev.mongodb.model.User;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.WriteResult;
+import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.MongoClientFactory;
@@ -143,23 +138,36 @@ public class SearchController {
 //                documents.add(searcher.doc(scoreDoc.doc));
 //            }
 
-            JSONObject[] results = {};
+            JSONObject[] results = new JSONObject[10];
 
 
             MongoClient mongoClient = new MongoClient("localhost", 27017);
             DB db = mongoClient.getDB("group5tweeter");
             DBCollection col = db.getCollection("tweet_collection");
+            int ind = 0;
 
+            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+                Document temp = searcher.doc(scoreDoc.doc);
+                String hitId = temp.get("_id");
+                ObjectId hitIdObj = new ObjectId(hitId);
+                System.out.println(hitId);
+                BasicDBObject queryObj = new BasicDBObject("_id", hitIdObj);
 
-            List<Document> docs = new ArrayList<>();
-            for (Document x : topDocs) {
-                String temp = x.get("_id");
-                //shove into mongo
-                DBCursor cursor = col.find(temp);
-                //take whatever we get append to results
+                try (DBCursor cursor = col.find(queryObj)) {
+                    while (cursor.hasNext()) {
+                        DBObject resultDBO = cursor.next();
+                        JSONObject resultJSON = new JSONObject(JSON.serialize(resultDBO));
+                        results[ind] = resultJSON;
+                        ind++;
+                    }
+                }
             }
 
-            //return results;
+            for (JSONObject x : results) {
+                System.out.println(x);
+            }
+
+            return results;
         } catch (Exception e) {
             System.out.println("rip " + e);
             e.printStackTrace();
