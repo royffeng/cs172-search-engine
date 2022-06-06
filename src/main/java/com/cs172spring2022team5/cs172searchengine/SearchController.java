@@ -1,7 +1,5 @@
 package com.cs172spring2022team5.cs172searchengine;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.mongodb.*;
 
 import com.mongodb.DB;
@@ -10,8 +8,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
 import org.json.JSONArray;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.mongo.MongoClientFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +30,6 @@ import org.json.JSONObject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import javax.websocket.server.PathParam;
 import java.io.*;
 import java.nio.file.Paths;
@@ -148,13 +143,17 @@ public class SearchController {
                 Document temp = searcher.doc(scoreDoc.doc);
                 String hitId = temp.get("_id");
                 ObjectId hitIdObj = new ObjectId(hitId);
-                System.out.println(hitId);
+                //System.out.println(hitId);
                 BasicDBObject queryObj = new BasicDBObject("_id", hitIdObj);
 
                 try (DBCursor cursor = col.find(queryObj)) {
                     while (cursor.hasNext()) {
                         DBObject resultDBO = cursor.next();
                         JSONObject resultJSON = new JSONObject(JSON.serialize(resultDBO));
+                        Long strId = resultJSON.getLong("id");
+                        String strScreenName = resultJSON.getString("screen_name");
+                        String strUrl = "https://twitter.com/" + strScreenName + "/status/" + strId;
+                        resultJSON.put("url", strUrl);
                         jsArr.put(resultJSON.toMap());
                     }
                 }
