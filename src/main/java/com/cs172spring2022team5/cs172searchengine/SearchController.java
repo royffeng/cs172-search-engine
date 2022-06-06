@@ -30,17 +30,16 @@ import org.json.JSONObject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
-
-
+import javax.websocket.server.PathParam;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-
+@CrossOrigin("http://localhost:3000/")
 @RestController
-@RequestMapping("/api")
-@CrossOrigin("*")
-//@JsonIgnoreProperties(ignoreUnknown = true)
+@RequestMapping(value = "api/", method = RequestMethod.POST)
 public class SearchController {
 
     public static final String output_directory = "C:\\Users\\micha\\Desktop\\oneseventwo\\index";
@@ -113,8 +112,9 @@ public class SearchController {
         // System.out.println("Total Objects: " + objCount);
     }
 
-    @GetMapping("/search/{queryString}")
-    public static ResponseEntity<Object> searchFiles(@PathVariable String queryString) {
+    @GetMapping("search")
+    public static ResponseEntity<Object> searchFiles(@RequestBody String queryString) {
+        System.out.println("Here's the search: " + queryString);
         try {
             Query query = new QueryParser("tweet_text", analyzer).parse(queryString);
 
@@ -157,6 +157,10 @@ public class SearchController {
                         jsArr.put(resultJSON.toMap());
                     }
                 }
+            }
+
+            for (Object x : jsArr) {
+                System.out.println(x);
             }
 
             return new ResponseEntity<>(jsArr.toList(), HttpStatus.OK);
