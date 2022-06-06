@@ -47,7 +47,7 @@ import java.util.List;
 @RequestMapping(value = "api/", method = RequestMethod.POST)
 public class SearchController {
 
-    public static final String output_directory = "/Users/royfeng/Desktop/cs172-search-engine/index";
+    public static final String output_directory = "C:\\Users\\micha\\Desktop\\oneseventwo\\index";
     public static Analyzer analyzer = new StandardAnalyzer(); // converts text to tokens
 
     static {
@@ -62,7 +62,7 @@ public class SearchController {
     }
 
     public static void createIndex() throws Exception {
-        File inputFile = new File("/Users/royfeng/Desktop/cs172-search-engine/pretty_tweet_collection.json"); // file that you are reading from
+        File inputFile = new File("C:\\Users\\micha\\Desktop\\oneseventwo\\pretty_tweet_collection.json"); // file that you are reading from
         BufferedReader reader = new BufferedReader(new FileReader(inputFile));
         ArrayList<JSONObject> jsonObjectArray = new ArrayList<>();
 
@@ -160,9 +160,9 @@ public class SearchController {
                 }
             }
 
-//            for (JSONObject x : results) {
-//                System.out.println(x);
-//            }
+            for (Object x : jsArr) {
+                System.out.println(x);
+            }
 
             return new ResponseEntity<>(jsArr.toList(), HttpStatus.OK);
         } catch (Exception e) {
